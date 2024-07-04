@@ -20,7 +20,7 @@ public sealed class NIN_Toshi : NinjaRotation
 
         // Clears ninjutsu setup if countdown is more than 10 seconds or if Huton is the aim but shouldn't be.
         if (remainTime > 10) ClearNinjutsu();
-        var realInHuton = !HutonEndAfterGCD() || IsLastAction(false, HutonPvE);
+        var realInHuton = IsLastAction(false, HutonPvE);
         if (realInHuton && _ninActionAim == HutonPvE) ClearNinjutsu();
 
         // Decision-making for ninjutsu actions based on remaining time until combat starts.
@@ -126,19 +126,6 @@ public sealed class NIN_Toshi : NinjaRotation
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
             // Also considers using Suiton for vulnerability debuff on the enemy if conditions are optimal.
-
-            if (!HutonEndAfterGCD() && _ninActionAim?.ID == HutonPvE.ID)
-            {
-                ClearNinjutsu();
-                return false;
-            }
-            if (TenPvE.CanUse(out _, usedUp: true)
-               && (!InCombat) && HutonPvE.CanUse(out _)
-               && !IsLastAction(false, HutonPvE))
-            {
-                SetNinjutsu(HutonPvE);
-                return false;
-            }
 
             //Aoe
             if (KatonPvE.CanUse(out _))
@@ -299,9 +286,6 @@ public sealed class NIN_Toshi : NinjaRotation
     [RotationDesc(ActionID.ForkedRaijuPvE)]
     protected override bool MoveForwardGCD(out IAction? act)
     {
-        // Initializes the action to null, indicating no action has been chosen yet.
-        act = null;
-
         // Checks if Forked Raiju, a movement-friendly ability, can be used. 
         // If so, sets it as the action to perform, returning true to indicate an action has been selected.
         if (ForkedRaijuPvE.CanUse(out act)) return true;
@@ -416,7 +400,7 @@ public sealed class NIN_Toshi : NinjaRotation
         if (DeathBlossomPvE.CanUse(out act)) return true;
 
         //Single
-        if (ArmorCrushPvE.CanUse(out act)) return true;
+        if (!InTrickAttack && Kazematoi < 5 && ArmorCrushPvE.CanUse(out act)) return true;
         if (AeolianEdgePvE.CanUse(out act)) return true;
         if (GustSlashPvE.CanUse(out act)) return true;
         if (SpinningEdgePvE.CanUse(out act)) return true;
