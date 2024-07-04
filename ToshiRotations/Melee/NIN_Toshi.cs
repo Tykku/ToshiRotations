@@ -11,6 +11,8 @@ public sealed class NIN_Toshi : NinjaRotation
     public bool UseHide { get; set; } = true;
     [RotationConfig(CombatType.PvE, Name = "Use Unhide")]
     public bool AutoUnhide { get; set; } = true;
+
+    public bool IsShadowWalking = (Player.HasStatus(true, StatusID.ShadowWalker));
     #endregion
 
     #region CountDown Logic
@@ -98,6 +100,12 @@ public sealed class NIN_Toshi : NinjaRotation
             if (HyoshoRanryuPvE.CanUse(out _))
             {
                 SetNinjutsu(HyoshoRanryuPvE);
+                return false;
+            }
+
+            if (KatonPvE.CanUse(out _) && !TrickAttackPvE.IsInCooldown)
+            {
+                SetNinjutsu(HutonPvE);
                 return false;
             }
 
@@ -319,7 +327,8 @@ public sealed class NIN_Toshi : NinjaRotation
         if (!CombatElapsedLess(6))
         {
             // Attempts to use Trick Attack if it's available.
-            if (TrickAttackPvE.CanUse(out act)) return true;
+
+            if (TrickAttackPvE.CanUse(out act, skipStatusProvideCheck: IsShadowWalking)) return true;
 
             // If Trick Attack is on cooldown but will not be ready soon, considers using Meisui to recover Ninki.
             if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && MeisuiPvE.CanUse(out act)) return true;
@@ -406,8 +415,10 @@ public sealed class NIN_Toshi : NinjaRotation
         if (SpinningEdgePvE.CanUse(out act)) return true;
 
         //Range
-
-        if (ThrowingDaggerPvE.CanUse(out act)) return true;
+        if (!Player.HasStatus(true, StatusID.Mudra))
+        {
+            if (ThrowingDaggerPvE.CanUse(out act)) return true;
+        }
 
         if (AutoUnhide)
         {
@@ -436,10 +447,9 @@ public sealed class NIN_Toshi : NinjaRotation
     // Displays the current status of the rotation, including the aimed ninjutsu action, if any.
     public override void DisplayStatus()
     {
-        if (_ninActionAim != null)
-        {
-            ImGui.Text(_ninActionAim.ToString() + _ninActionAim.AdjustedID.ToString());
-        }
+
+        ImGui.Text(Ninki.ToString());
+
         base.DisplayStatus();
     }
     #endregion
