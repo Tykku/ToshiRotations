@@ -320,6 +320,8 @@ public sealed class NIN_Toshi : NinjaRotation
         // Next, checks if a burst medicine is available and appropriate to use.
         if (UseBurstMedicine(out act)) return true;
 
+        if (TenriJindoPvE.CanUse(out act)) return true;
+
         // If in a burst phase and not just starting combat, checks if Mug is available to generate additional Ninki.
         if (IsBurst && !CombatElapsedLess(5) && MugPvE.CanUse(out act)) return true;
 
