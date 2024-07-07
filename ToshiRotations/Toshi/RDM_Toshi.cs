@@ -117,8 +117,7 @@ public sealed class RDM_Toshi : RedMageRotation
         if (RedoublementPvE.CanUse(out act)) return true;
 
         if (!CanStartMeleeCombo) return false;
-        if (noRiposteDoubleCast)
-        {
+
             if (MoulinetPvE.CanUse(out act))
             {
                 if (BlackMana >= 50 && WhiteMana >= 50 || Player.HasStatus(true, StatusID.MagickedSwordplay))
@@ -131,7 +130,7 @@ public sealed class RDM_Toshi : RedMageRotation
             }
 
             if (ManaStacks > 0 && RipostePvE.CanUse(out act)) return true;
-        }
+        
 
         if (IsMoving && RangedSwordplay && (ReprisePvE.CanUse(out act) || EnchantedReprisePvE.CanUse(out act))) return true;
 
@@ -179,6 +178,8 @@ public sealed class RDM_Toshi : RedMageRotation
 
             if (BlackMana == WhiteMana) return false;
 
+            if (ScorchPvE.EnoughLevel && (IsLastGCD(ActionID.VerholyPvE) || IsLastGCD(ActionID.VerfirePvE))) return false;
+            
             else if (WhiteMana < BlackMana)
             {
                 if (Player.HasStatus(true, StatusID.VerstoneReady)) return false;
