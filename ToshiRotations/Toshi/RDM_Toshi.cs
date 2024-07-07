@@ -37,7 +37,8 @@ public sealed class RDM_Toshi : RedMageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         bool AnyoneInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() <= 4);
-        
+        bool doubleMeleeProtection = (!ResolutionPvE.EnoughLevel && IsLastGCD(ActionID.ScorchPvE)) || (!ScorchPvE.EnoughLevel && (IsLastGCD(ActionID.VerholyPvE) || IsLastGCD(ActionID.VerfirePvE)));
+
         act = null;
         if (CombatElapsedLess(4)) return false;
         if (!AnyonesMeleeRule)
@@ -50,7 +51,7 @@ public sealed class RDM_Toshi : RedMageRotation
 
         //Use Manafication after embolden.
         if ((Player.HasStatus(true, StatusID.Embolden) || IsLastAbility(ActionID.EmboldenPvE))
-            && ManaficationPvE.CanUse(out act)) return true;
+            && !doubleMeleeProtection && ManaficationPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -177,8 +178,6 @@ public sealed class RDM_Toshi : RedMageRotation
                              BlackMana == 100 || WhiteMana == 100) return true;
 
             if (BlackMana == WhiteMana) return false;
-
-            if (ScorchPvE.EnoughLevel && (IsLastGCD(ActionID.VerholyPvE) || IsLastGCD(ActionID.VerfirePvE))) return false;
             
             else if (WhiteMana < BlackMana)
             {
