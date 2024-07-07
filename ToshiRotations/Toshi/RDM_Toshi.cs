@@ -174,8 +174,10 @@ public sealed class RDM_Toshi : RedMageRotation
     {
         get
         {
-            if (Player.HasStatus(true, StatusID.Manafication, StatusID.Embolden, StatusID.MagickedSwordplay) ||
-                             BlackMana == 100 || WhiteMana == 100) return true;
+            if (Player.HasStatus(true, StatusID.Embolden) && 
+                 Player.HasStatus(true, StatusID.Manafication) && (
+                 Player.HasStatus(true, StatusID.MagickedSwordplay) ||
+                             BlackMana == 100 || WhiteMana == 100)) return true;
 
             if (BlackMana == WhiteMana) return false;
             
