@@ -88,7 +88,9 @@ public sealed class RDM_Toshi : RedMageRotation
 
     protected override bool EmergencyGCD(out IAction? act)
     {
-        bool noRiposteDoubleCast = !IsLastGCD(ActionID.VerholyPvE) || !IsLastGCD(ActionID.VerfirePvE) || !ScorchPvE.EnoughLevel;
+        bool inACombo = (ResolutionPvE.EnoughLevel && IsLastGCD(ActionID.ScorchPvE)) || (ScorchPvE.EnoughLevel && (IsLastGCD(ActionID.VerholyPvE) || IsLastGCD(ActionID.VerfirePvE)));
+        bool meleeReady = BlackMana >= 50 && WhiteMana >= 50 || Player.HasStatus(true, StatusID.MagickedSwordplay);
+        
         // Hardcode Resolution & Scorch to avoid double melee without finishers
         if (ResolutionPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (ScorchPvE.CanUse(out act, skipAoeCheck: true)) return true;
@@ -114,23 +116,15 @@ public sealed class RDM_Toshi : RedMageRotation
         }
 
         if (IsLastGCD(true, MoulinetPvE) && MoulinetPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (ZwerchhauPvE.CanUse(out act)) return true;
+        
         if (RedoublementPvE.CanUse(out act)) return true;
+        if (ZwerchhauPvE.CanUse(out act)) return true;
 
-        if (!CanStartMeleeCombo) return false;
 
-            if (MoulinetPvE.CanUse(out act))
-            {
-                if (BlackMana >= 50 && WhiteMana >= 50 || Player.HasStatus(true, StatusID.MagickedSwordplay))
-                    return true;
-            }
-            else
-            {
-                if ((BlackMana >= 50 && WhiteMana >= 50 || Player.HasStatus(true, StatusID.MagickedSwordplay)) &&
-                    RipostePvE.CanUse(out act)) return true;
-            }
-
-            if (ManaStacks > 0 && RipostePvE.CanUse(out act)) return true;
+        // Start your Melee
+        if (meleeReady && CanStartMeleeCombo && MoulinetPvE.CanUse(out act)) return true;
+        if (meleeReady && CanStartMeleeCombo && RipostePvE.CanUse(out act)) return true;
+        if (ManaStacks > 0 && ManaStacks < 3 && !inACombo && RipostePvE.CanUse(out act)) return true;
         
 
         if (IsMoving && RangedSwordplay && (ReprisePvE.CanUse(out act) || EnchantedReprisePvE.CanUse(out act))) return true;
@@ -174,11 +168,8 @@ public sealed class RDM_Toshi : RedMageRotation
     {
         get
         {
-            if (Player.HasStatus(true, StatusID.Embolden) && 
-                 Player.HasStatus(true, StatusID.Manafication) && (
-                 Player.HasStatus(true, StatusID.MagickedSwordplay) ||
-                             BlackMana == 100 || WhiteMana == 100)) return true;
-
+            if (Player.HasStatus(true, StatusID.Embolden) && Player.HasStatus(true, StatusID.Manafication) && (Player.HasStatus(true, StatusID.MagickedSwordplay) || BlackMana == 100 || WhiteMana == 100)) return true;
+                
             if (BlackMana == WhiteMana) return false;
             
             else if (WhiteMana < BlackMana)
